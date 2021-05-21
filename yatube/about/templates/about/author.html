@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+  <div class="row">
+    <div class="col-md-3 mb-3 mt-1">
+      <div class="card">
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <div class="h3">
+                Об авторе
+              </div>
+            </li>
+            <li class="list-group-item">
+              <div class="h6 text-muted">
+                <div class="width">
+                  {% load static %}  <!--Без этого тега не работает-->
+                  <img src="{% static 'about/about_author.jpg' %}" alt="Фото автора" style="display: block; width: 100%; height: auto; margin: auto;">
+                </div>
+                <p>
+                  Елена Шипкова<br>
+                  г. Казань
+                </p>
+                <hr>
+                <a href="https://github.com/elenashipkova" target="_blank">Мой аккаунт на github</a>
+                <hr>
+                <a href="https://instagram.com/shipkovae?igshid=1lq3aox2pu6zh" target="_blank">Мой Instagram</a>
+                <hr>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <div class="card-body">
+        <div class="card-text">
+          <p>
+            Если вы все же увидели этот текст, значит, я на верном пути.
+            Много лет, а точнее всю свою жизнь я проработала в банке.
+            Прошла путь от простого сотрудника до заместителя главного
+            бухгалтера крупного регионального банка. Когда я поняла, что
+            мне хочется новизны, а главное, создавать что-то нужное для жизни
+            в современном мире, близкий человек предложил мне попробовать себя
+            в программировании. Я прошла парочку бесплатных курсов и решив,
+            что нужно углубиться, остановила свой выбор на платном курсе
+            Яндекс Практикума.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

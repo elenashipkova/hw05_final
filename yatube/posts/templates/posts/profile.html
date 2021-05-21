@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Профиль пользователя {{ profile.username }}{% endblock %}
+
+{% block content %}
+  {% load user_filters %}
+  <div class="row">
+    <div class="col-md-3 mb-3 mt-1">
+      <div class="card">
+        <div class="card-body">
+          <div class="h2">
+            {{ profile.get_full_name }}
+          </div>
+          <div class="h3 text-muted">
+            {{ profile.username }}
+          </div>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="h6 text-muted">
+              Подписчиков: {{ profile.following.count}} <br />
+              Подписан: {{ profile.follower.count }}
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="h6 text-muted">
+              Количество записей:{{ profile.posts.count }}
+            </div>
+            <li class="list-group-item">
+              {% if following %}
+                <a class="btn btn-lg btn-light" href="{% url 'profile_unfollow' profile.username %}" role="button"> 
+                  Отписаться 
+                </a> 
+              {% else %}
+                <a class="btn btn-lg btn-primary" href="{% url 'profile_follow' profile.username %}" role="button">
+                  Подписаться 
+                </a>
+              {% endif %}
+            </li>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-9">
+
+      <div class="container">
+        <!-- Вывод ленты записей -->
+        {% for post in page %}
+          <!-- Вот он, новый include! -->
+          {% include "includes/post_item.html" with post=post %}
+        {% endfor %}
+      </div>
+
+      {% if page.has_other_pages %}
+        {% include "includes/paginator.html" with items=page paginator=paginator%}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

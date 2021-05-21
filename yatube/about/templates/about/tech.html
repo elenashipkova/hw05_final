@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Технологии{% endblock %}
+{% block content %}
+  <div class="row">
+    <div class="col-md-3 mb-3 mt-1">
+      <div class="card">
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <div class="h3">
+                Технологии
+              </div> 
+            </li>
+            <li class="list-group-item">
+              <div class="h6 text-muted">
+                {% load static %}
+                <div class="width">
+                  <img src="{% static 'about/python_django.png' %}" alt="Технологии" style="display: block; width: 100%; height: auto; margin: auto;">
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-9">
+      <div class="card-body">
+        <div class="card-text">
+          <p>
+            Этот сайт создан на фреймворке Django. А Python - мой первый язык программирования.
+            Также, как и HTML - язык гипертекстовой разметки, определяющий содержание и структуру
+            веб-контента. А еще в ходе создания проекта я узнала, что и HTML, и CSS на самом деле не
+            являются языками программирования.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
