@@ -243,7 +243,3 @@ class FollowTests(TestCase):
         authorized_client.force_login(FollowTests.user3)
         response = authorized_client.get(reverse('follow_index'))
         self.assertEqual(len(response.context.get('page').object_list), 0)
-
-
-
-

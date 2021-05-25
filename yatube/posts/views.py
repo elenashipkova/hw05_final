@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import CommentForm, PostForm
-from .models import Follow, Group, Comment, Post, User
+from .models import Follow, Group, Post, User
 
 
 def get_paginator_page(request, post_list):
@@ -125,7 +125,7 @@ def profile_unfollow(request, username):
 
 def page_not_found(request, exception):
     return render(
-        request, 
+        request,
         "misc/404.html",
         {"path": request.path},
         status=404
