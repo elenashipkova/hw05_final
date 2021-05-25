@@ -81,5 +81,5 @@ class PostURLTests(TestCase):
                 self.assertRedirects(response, redirect_page)
 
     def test_page_not_found_error(self):
-        response = self.client.get('/group/')
+        response = self.client.get('/unknown/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

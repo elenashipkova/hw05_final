@@ -42,12 +42,13 @@ def profile(request, username):
     profile = get_object_or_404(User, username=username)
     profile_post_list = profile.posts.all()
     page = get_paginator_page(request, profile_post_list)
+    following = False
     if request.user.is_authenticated:
         following = request.user.follower.filter(author=profile).exists()
     return render(
         request,
         'posts/profile.html',
-        {'profile': profile, 'page': page, 'user': request.user, 'following': following}
+        {'profile': profile, 'page': page, 'following': following}
     )
 
 
@@ -58,7 +59,10 @@ def post_view(request, username, post_id):
     return render(
         request,
         'posts/post.html',
-        {'author': post.author, 'post': post, 'comments': comments, 'form': form}
+        {'author': post.author,
+         'post': post,
+         'comments': comments,
+         'form': form}
     )
 
 
@@ -68,7 +72,9 @@ def post_edit(request, username, post_id):
     if request.user != post.author:
         return redirect('post', username=username, post_id=post.id)
 
-    form = PostForm(request.POST or None, files=request.FILES or None, instance=post)
+    form = PostForm(
+        request.POST or None, files=request.FILES or None, instance=post
+    )
     if form.is_valid():
         form.save()
         return redirect('post', username=username, post_id=post.id)
@@ -86,10 +92,10 @@ def add_comment(request, username, post_id):
     if form.is_valid():
         comment = form.save(commit=False)
         comment.author = request.user
-        comment.post = post
+        comment.post_id = post_id
         comment.save()
         return redirect('post', username=username, post_id=post.id)
-    return render(request, 'includes/comments.html', {'form': form})
+    return render(request, 'posts/post.html', {'form': form})
 
 
 @login_required
@@ -104,7 +110,7 @@ def profile_follow(request, username):
     follower = request.user
     author = get_object_or_404(User, username=username)
     if follower != author:
-        Follow.objects.create(user=follower, author=author)
+        Follow.objects.get_or_create(user=follower, author=author)
     return redirect('profile', username=username)
 
 

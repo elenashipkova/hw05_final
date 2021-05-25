@@ -42,7 +42,7 @@ class Comment(models.Model):
                              related_name='comments', verbose_name='Комментарий')
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='comments', verbose_name='Автор')
-    text = models.CharField(max_length=500, verbose_name='Текст комментария')
+    text = models.TextField(max_length=500, verbose_name='Текст комментария')
     created = models.DateTimeField(auto_now_add=True,
                                    verbose_name='Дата комментария')
 

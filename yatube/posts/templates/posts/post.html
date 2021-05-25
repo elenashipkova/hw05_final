@@ -38,7 +38,7 @@
         {% endthumbnail %}
         <div class="card-body">
           <p class="card-text">
-            <a href="{% url 'profile' author.username %}"><strong class="d-block text-gray-dark">@{{ author.username }}</strong></a>
+            <a href="{% url 'profile' post.author.username %}"><strong class="d-block text-gray-dark">@{{ author.username }}</strong></a>
             {{ post.text|linebreaksbr }}
           </p>
           {% include "includes/comments.html" %}
