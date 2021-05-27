@@ -3,18 +3,20 @@ import tempfile
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from posts.models import Group, Post, User
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostFormTests(TestCase):
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         cls.user = User.objects.create_user(username='testuser')
         cls.group = Group.objects.create(
             title='Тестгруппа',
@@ -23,7 +25,7 @@ class PostFormTests(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
         super().tearDownClass()
 
     def setUp(self):
@@ -39,8 +41,9 @@ class PostFormTests(TestCase):
             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
             b'\x0A\x00\x3B'
         )
+        image = 'test.gif'
         uploaded = SimpleUploadedFile(
-            name='test.gif',
+            name=image,
             content=test_gif,
             content_type='test/gif'
         )
@@ -59,7 +62,7 @@ class PostFormTests(TestCase):
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group, PostFormTests.group)
         self.assertEqual(post.author, PostFormTests.user)
-        self.assertEqual(post.image, 'posts/test.gif')
+        self.assertEqual(post.image, f'posts/{image}')
 
     def test_post_edit_form_updates_post(self):
         post = Post.objects.create(
@@ -135,3 +138,42 @@ class PostFormTests(TestCase):
         self.assertNotEqual(post.text, form_data['text'])
         self.assertNotEqual(post.group, form_data['group'])
         self.assertNotEqual(post.author, user1)
+
+
+class CommentFormTests(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='Tester')
+        cls.post = Post.objects.create(
+            text='тестовый текст',
+            author=cls.user,
+        )
+
+    def setUp(self):
+        self.authorized_client = Client()
+        self.authorized_client.force_login(CommentFormTests.user)
+
+    def test_auth_user_creates_comment(self):
+        username = CommentFormTests.user.username
+        post_id = CommentFormTests.post.id
+        commentator = User.objects.create_user(username='Commentator')
+        authorized_reader = Client()
+        authorized_reader.force_login(commentator)
+        comment_text = 'Тест комментарий'
+        response = authorized_reader.post(
+            reverse('add_comment', args=(username, post_id)),
+            {'text': comment_text}, follow=True
+        )
+        self.assertContains(response, comment_text)
+
+    def test_guest_client_cannot_create_comment(self):
+        username = CommentFormTests.user.username
+        post_id = CommentFormTests.post.id
+        comment_text = 'Тестовый комментарий'
+        response = self.client.post(
+            reverse('add_comment', args=(username, post_id)),
+            {'text': comment_text}, follow=True
+        )
+        self.assertNotContains(response, comment_text)

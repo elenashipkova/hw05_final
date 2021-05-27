@@ -13,7 +13,7 @@
   <div class="row justify-content-center">
     <div class="col-md-8 p-5">
       <div class="card">
-        <div class="card-header">{% if edit %}Редактировать запись{% else %}Новая запись{% endif %}</div>
+        <div class="card-header">{% if edit %}Редактировать{% else %}Новая{% endif %} запись</div>
         <div class="card-body">
           {% if form.errors %}
             {% for field in form %}
@@ -29,7 +29,7 @@
 
           <form method="post" enctype="multipart/form-data"
             {% if post %}
-              "{% url 'post_edit' post.author.username post.id %}"
+              action="{% url 'post_edit' post.author.username post.id %}"
             {% else %}
               "{% url 'new_post' %}"
             {% endif %}>

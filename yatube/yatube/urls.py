@@ -23,8 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('posts.urls')),
     path('about/', include('about.urls', namespace='about')),
-    path('auth/', include('django.contrib.auth.urls')),
     path('auth/', include('users.urls')),
+    path('auth/', include('django.contrib.auth.urls')),
 ]
 
 handler404 = 'posts.views.page_not_found'  # noqa

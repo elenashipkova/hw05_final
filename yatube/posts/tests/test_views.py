@@ -4,13 +4,16 @@ import tempfile
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from posts.forms import PostForm
-from posts.models import Group, Post, User
+from posts.models import Follow, Group, Post, User
+
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostPagesTests(TestCase):
 
     @classmethod
@@ -29,7 +32,6 @@ class PostPagesTests(TestCase):
             content=small_gif,
             content_type='image/gif'
         )
-        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         cls.user = User.objects.create_user(username='testuser1')
         cls.group = Group.objects.create(title='Тестгруппа',
                                          description='описание',
@@ -41,7 +43,7 @@ class PostPagesTests(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
         super().tearDownClass()
 
     def setUp(self):
@@ -55,7 +57,7 @@ class PostPagesTests(TestCase):
                 author=PostPagesTests.user,
                 group=PostPagesTests.group
             )
-            for post in range(13)
+            for post in range(20)
         ]
         Post.objects.bulk_create(many_posts)
 
@@ -157,29 +159,10 @@ class PostPagesTests(TestCase):
         post_id = PostPagesTests.post.id
         post_edit_page = reverse('post_edit', args=(username, post_id))
         response = self.authorized_client.get(post_edit_page)
-        self.checking_post_context_parameters(response.context, 'post')
         self.assertIn('form', response.context)
         self.assertIn('edit', response.context)
         self.assertIsInstance(response.context['form'], PostForm)
         self.assertIs(response.context['edit'], True)
-
-    def test_auth_user_only_creates_comment(self):
-        username = PostPagesTests.user.username
-        post_id = PostPagesTests.post.id
-        commentator = User.objects.create_user(username='Commentator')
-        authorized_client = Client()
-        authorized_client.force_login(commentator)
-        comment_text = 'Тест комментарий'
-        response = authorized_client.post(
-            reverse('add_comment', args=(username, post_id)),
-            {'text': comment_text}, follow=True
-        )
-        self.assertContains(response, comment_text)
-        response = self.client.post(
-            reverse('add_comment', args=(username, post_id)),
-            {'text': comment_text}, follow=True
-        )
-        self.assertNotContains(response, comment_text)
 
     def test_cache_page(self):
         response_0 = self.client.get(reverse('index'))
@@ -199,47 +182,54 @@ class FollowTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.user1 = User.objects.create_user(username='Автор')
-        cls.user2 = User.objects.create_user(username='Подписчик')
-        cls.user3 = User.objects.create_user(username='Гость')
+        cls.author = User.objects.create_user(username='Автор')
+        cls.follower = User.objects.create_user(username='Подписчик')
+        cls.guest = User.objects.create_user(username='Гость')
         cls.post1 = Post.objects.create(text='тест подписок',
-                                        author=cls.user1)
+                                        author=cls.author)
 
     def setUp(self):
         self.authorized_client = Client()
-        self.authorized_client.force_login(FollowTests.user1)
+        self.authorized_client.force_login(FollowTests.author)
 
-    def test_auth_user_can_follow_and_unfollow(self):
-        authorized_client = Client()
-        authorized_client.force_login(FollowTests.user2)
-        author_username = FollowTests.user1.username
-        fol_username = FollowTests.user2.username
-        authorized_client.get(
+    def test_auth_user_can_follow_authors(self):
+        authorized_follower = Client()
+        authorized_follower.force_login(FollowTests.follower)
+        author_username = FollowTests.author.username
+        follow_count = Follow.objects.filter(
+            author=FollowTests.author, user=FollowTests.follower).count()
+        authorized_follower.get(
             reverse('profile_follow', args=(author_username,))
         )
-        response = authorized_client.get(
-            reverse('profile', args=(fol_username,))
-        )
-        self.assertEqual(response.context['following'], False)
-        authorized_client.get(
+        count = Follow.objects.filter(
+            author=FollowTests.author, user=FollowTests.follower).count()
+        self.assertEqual(count, follow_count + 1)
+
+    def test_auth_user_can_unfollow(self):
+        authorized_follower = Client()
+        authorized_follower.force_login(FollowTests.follower)
+        author_username = FollowTests.author.username
+        Follow.objects.create(
+            author=FollowTests.author, user=FollowTests.follower)
+        follow_count = Follow.objects.filter(
+            author=FollowTests.author, user=FollowTests.follower).count()
+        authorized_follower.get(
             reverse('profile_unfollow', args=(author_username,))
         )
-        response = authorized_client.get(
-            reverse('profile', args=(fol_username,))
-        )
-        self.assertEqual(response.context['following'], 0)
+        count = Follow.objects.filter(
+            author=FollowTests.author, user=FollowTests.follower).count()
+        self.assertEqual(count, follow_count - 1)
 
     def test_authors_post_appears_at_follow_index(self):
-        authorized_client = Client()
-        authorized_client.force_login(FollowTests.user2)
-        author_username = FollowTests.user1.username
-        authorized_client.get(
-            reverse('profile_follow', args=(author_username,))
-        )
-        response = authorized_client.get(reverse('follow_index'))
+        authorized_follower = Client()
+        authorized_follower.force_login(FollowTests.follower)
+        Follow.objects.create(
+            author=FollowTests.author, user=FollowTests.follower)
+        response = authorized_follower.get(reverse('follow_index'))
         self.assertEqual(response.context['page'][0], FollowTests.post1)
-        authorized_client.logout()
-        authorized_client = Client()
-        authorized_client.force_login(FollowTests.user3)
-        response = authorized_client.get(reverse('follow_index'))
+
+    def test_authors_post_not_shown_to_unfollows(self):
+        authorized_reader = Client()
+        authorized_reader.force_login(FollowTests.guest)
+        response = authorized_reader.get(reverse('follow_index'))
         self.assertEqual(len(response.context.get('page').object_list), 0)

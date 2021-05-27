@@ -1,9 +1,9 @@
 {% load user_filters %}
 
 {% if user.is_authenticated %}
-<div class="card my-4">
-  <form action="{% url 'add_comment' post.author.username post.id %}"
-    method="post">
+  <div class="card my-4">
+    <form action="{% url 'add_comment' post.author.username post.id %}"
+      method="post">
       {% csrf_token %}
       <h5 class="card-header">Добавить комментарий:</h5>
       <div class="card-body">
@@ -12,22 +12,21 @@
         </div>
         <button type="submit" class="btn btn-primary">Отправить</button>
       </div>
-  </form>
-</div>
+    </form>
+  </div>
 {% endif %}
 
-<!-- Комментарии -->
-{% for item in comments %}
-<div class="media card mb-4">
-  <div class="media-body card-body">
-    <h5 class="mt-0">
-      <a href="{% url 'profile' item.author.username %}"
-        name="comment_{{ item.id }}">
-        {{ item.author.username }}
-      </a>
-    </h5>
-    <p>{{ item.text | linebreaksbr }}</p>
-    <small class="text-muted">{{ item.created|date:"d M Y" }}</small>
+{% for item in post.comments.all %}
+  <div class="media card mb-4">
+    <div class="media-body card-body">
+      <h5 class="mt-0">
+        <a href="{% url 'profile' item.author.username %}"
+          name="comment_{{ item.id }}">
+          {{ item.author.username }}
+        </a>
+      </h5>
+      <p>{{ item.text|linebreaksbr }}</p>
+      <small class="text-muted">{{ item.created }}</small>
+    </div>
   </div>
-</div>
 {% endfor %}

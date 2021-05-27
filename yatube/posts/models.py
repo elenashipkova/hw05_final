@@ -50,6 +50,7 @@ class Comment(models.Model):
                                    verbose_name='Дата комментария')
 
     class Meta:
+        verbose_name_plural = 'Комментарии'
         ordering = ('-created',)
 
     def __str__(self):
