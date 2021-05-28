@@ -56,11 +56,12 @@ def profile(request, username):
 
 def post_view(request, username, post_id):
     post = get_object_or_404(Post, id=post_id, author__username=username)
+    comments = post.comments.all()
     form = CommentForm()
     return render(
         request,
         'posts/post.html',
-        {'post': post, 'form': form}
+        {'post': post, 'comments': comments, 'form': form}
     )
 
 

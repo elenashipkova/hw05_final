@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.forms import PostForm
+from posts.forms import CommentForm, PostForm
 from posts.models import Follow, Group, Post, User
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -149,10 +149,9 @@ class PostPagesTests(TestCase):
         post_page = reverse('post', args=(username, post_id))
         response = self.client.get(post_page)
         self.checking_post_context_parameters(response.context, 'post')
-        self.assertIn('author', response.context)
-        self.assertEqual(
-            response.context['author'], PostPagesTests.post.author
-        )
+        self.assertIn('comments', response.context)
+        self.assertIn('form', response.context)
+        self.assertIsInstance(response.context['form'], CommentForm)
 
     def test_post_edit_page_shows_correct_context(self):
         username = PostPagesTests.user.username
