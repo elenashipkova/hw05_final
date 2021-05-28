@@ -159,6 +159,7 @@ class PostPagesTests(TestCase):
         post_id = PostPagesTests.post.id
         post_edit_page = reverse('post_edit', args=(username, post_id))
         response = self.authorized_client.get(post_edit_page)
+        self.checking_post_context_parameters(response.context, 'post')
         self.assertIn('form', response.context)
         self.assertIn('edit', response.context)
         self.assertIsInstance(response.context['form'], PostForm)

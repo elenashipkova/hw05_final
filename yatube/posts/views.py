@@ -79,7 +79,7 @@ def post_edit(request, username, post_id):
     return render(
         request,
         'posts/new.html',
-        {'form': form, 'edit': True}
+        {'form': form, 'post': post, 'edit': True}
     )
 
 
