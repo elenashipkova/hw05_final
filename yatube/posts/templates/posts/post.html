@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Запись пользователя {{ post.author.username.post.id }}{% endblock %}
+{% block title %}Запись пользователя {{ post.author.username }} {{ post.id }}{% endblock %}
 
 {% block content %}
   {% load user_filters %}
@@ -9,8 +9,8 @@
     </div>
 
     <div class="col-md-9">
-      {% include "includes/post_item.html" with post=post %}
-      {% include "includes/comments.html" with item=post.comments %}
+      {% include "includes/post_item.html" with post=post post_page=True %}
+      {% include "includes/comments.html" with comments=post.comments %}
     </div>
   </div>
 

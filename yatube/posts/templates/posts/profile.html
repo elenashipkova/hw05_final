@@ -8,7 +8,7 @@
       {% include "includes/author_item.html" with author=profile %}
       {% if request.user.is_authenticated %}
         {% if request.user != profile %}
-          <ul class="list-group list-group-flush">
+          <div class="list-group list-group-flush">
             {% if following %}
               <a class="btn btn-lg btn-light" href="{% url 'profile_unfollow' profile.username %}" role="button"> 
                 Отписаться 
@@ -18,7 +18,7 @@
                 Подписаться 
               </a>
             {% endif %}
-          </ul>
+          </div>
         {% endif %}
       {% endif %}
     </div>
@@ -27,7 +27,7 @@
       {% for post in page %}
         {% include "includes/post_item.html" with post=post %}
       {% endfor %}
-      {% include "includes/paginator.html" with items=page %}
+      {% include "includes/paginator.html" %}
     </div>
   </div>
 

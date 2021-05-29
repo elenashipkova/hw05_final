@@ -57,7 +57,7 @@ class PostPagesTests(TestCase):
                 author=PostPagesTests.user,
                 group=PostPagesTests.group
             )
-            for post in range(20)
+            for post in range(settings.POSTS_PER_PAGE * 2)
         ]
         Post.objects.bulk_create(many_posts)
 
@@ -196,14 +196,15 @@ class FollowTests(TestCase):
         authorized_follower = Client()
         authorized_follower.force_login(FollowTests.follower)
         author_username = FollowTests.author.username
-        follow_count = Follow.objects.filter(
-            author=FollowTests.author, user=FollowTests.follower).count()
+        follow_count = Follow.objects.count()
         authorized_follower.get(
             reverse('profile_follow', args=(author_username,))
         )
-        count = Follow.objects.filter(
-            author=FollowTests.author, user=FollowTests.follower).count()
-        self.assertEqual(count, follow_count + 1)
+        follow = Follow.objects.get(user=FollowTests.follower,
+                                    author=FollowTests.author)
+        self.assertEqual(Follow.objects.count(), follow_count + 1)
+        self.assertEqual(follow.author, FollowTests.author)
+        self.assertEqual(follow.user, FollowTests.follower)
 
     def test_auth_user_can_unfollow(self):
         authorized_follower = Client()

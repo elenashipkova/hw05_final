@@ -16,14 +16,15 @@ def get_paginator_page(request, post_list):
 
 def index(request):
     post_list = Post.objects.select_related(
-        'author', 'group').all().prefetch_related('comments')
+        'author', 'group').prefetch_related('comments')
     page = get_paginator_page(request, post_list)
     return render(request, 'posts/index.html', {'page': page})
 
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    posts_list = group.posts.all()
+    posts_list = group.posts.select_related(
+        'author', 'group').prefetch_related('comments')
     page = get_paginator_page(request, posts_list)
     return render(request, 'posts/group.html', {'group': group, 'page': page})
 
@@ -41,7 +42,8 @@ def new_post(request):
 
 def profile(request, username):
     profile = get_object_or_404(User, username=username)
-    profile_post_list = profile.posts.all()
+    profile_post_list = profile.posts.select_related(
+        'author', 'group').prefetch_related('comments')
     page = get_paginator_page(request, profile_post_list)
     following = False
     if request.user.is_authenticated:

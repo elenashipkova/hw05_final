@@ -31,7 +31,7 @@
             {% if post %}
               action="{% url 'post_edit' post.author.username post.id %}"
             {% else %}
-              "{% url 'new_post' %}"
+              action="{% url 'new_post' %}"
             {% endif %}>
 
             {% csrf_token %}

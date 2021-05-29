@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.models import Group, Post, User
+from posts.models import Comment, Group, Post, User
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -151,10 +151,6 @@ class CommentFormTests(TestCase):
             author=cls.user,
         )
 
-    def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(CommentFormTests.user)
-
     def test_auth_user_creates_comment(self):
         username = CommentFormTests.user.username
         post_id = CommentFormTests.post.id
@@ -162,18 +158,31 @@ class CommentFormTests(TestCase):
         authorized_reader = Client()
         authorized_reader.force_login(commentator)
         comment_text = 'Тест комментарий'
+        comment_count = Comment.objects.count()
         response = authorized_reader.post(
             reverse('add_comment', args=(username, post_id)),
             {'text': comment_text}, follow=True
         )
-        self.assertContains(response, comment_text)
+        comment = Comment.objects.first()
+        self.assertEqual(Comment.objects.count(), comment_count + 1)
+        self.assertRedirects(
+            response, reverse('post', args=(username, post_id))
+        )
+        self.assertEqual(comment.author, commentator)
+        self.assertEqual(comment.text, comment_text)
+        self.assertEqual(comment.post, CommentFormTests.post)
 
     def test_guest_client_cannot_create_comment(self):
         username = CommentFormTests.user.username
         post_id = CommentFormTests.post.id
         comment_text = 'Тестовый комментарий'
+        comment_count = Comment.objects.count()
         response = self.client.post(
             reverse('add_comment', args=(username, post_id)),
             {'text': comment_text}, follow=True
         )
-        self.assertNotContains(response, comment_text)
+        self.assertEqual(Comment.objects.count(), comment_count)
+        self.assertRedirects(
+            response, reverse('login') + '?next=' + reverse(
+                'add_comment', args=(username, post_id))
+        )

@@ -16,17 +16,17 @@
   </div>
 {% endif %}
 
-{% for item in post.comments.all %}
+{% for comment in post.comments.all %}
   <div class="media card mb-4">
     <div class="media-body card-body">
       <h5 class="mt-0">
-        <a href="{% url 'profile' item.author.username %}"
-          name="comment_{{ item.id }}">
-          {{ item.author.username }}
+        <a href="{% url 'profile' comment.author.username %}"
+          name="comment_{{ comment.id }}">
+          {{ comment.author.username }}
         </a>
       </h5>
-      <p>{{ item.text|linebreaksbr }}</p>
-      <small class="text-muted">{{ item.created }}</small>
+      <p>{{ comment.text|linebreaksbr }}</p>
+      <small class="text-muted">{{ comment.created }}</small>
     </div>
   </div>
 {% endfor %}

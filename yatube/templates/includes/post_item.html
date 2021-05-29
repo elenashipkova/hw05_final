@@ -14,16 +14,20 @@
     </p>
 
     {% if post.group %}
-    <a class="card-link muted" href="{% url 'group_posts' post.group.slug %}">
-      <strong class="d-block text-gray-dark">#{{ post.group.title }}</strong>
-    </a>
+      <a class="card-link muted" href="{% url 'group_posts' post.group.slug %}">
+        <strong class="d-block text-gray-dark">#{{ post.group.title }}</strong>
+      </a>
     {% endif %}
 
     <div class="d-flex justify-content-between align-items-center">
       <div class="btn-group">
-        <a class="btn btn-sm btn-primary" href="{% url 'post' post.author.username post.id %}" role="button">
-          Добавить комментарий
-        </a>
+        {% if user.is_authenticated %}
+          {% if not post_page %}
+            <a class="btn btn-sm btn-primary" href="{% url 'post' post.author.username post.id %}" role="button">
+              Добавить комментарий
+            </a>
+          {% endif %}
+        {% endif %}
 
         {% if user == post.author %}
           <a class="btn btn-sm btn-info" href="{% url 'post_edit' post.author.username post.id %}" role="button">
