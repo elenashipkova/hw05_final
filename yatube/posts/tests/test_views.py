@@ -200,8 +200,7 @@ class FollowTests(TestCase):
         authorized_follower.get(
             reverse('profile_follow', args=(author_username,))
         )
-        follow = Follow.objects.get(user=FollowTests.follower,
-                                    author=FollowTests.author)
+        follow = Follow.objects.first()
         self.assertEqual(Follow.objects.count(), follow_count + 1)
         self.assertEqual(follow.author, FollowTests.author)
         self.assertEqual(follow.user, FollowTests.follower)
