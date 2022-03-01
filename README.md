@@ -1,3 +1,42 @@
-# hw05_final
+# Проект социальной сети Yatube
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+## Описание
+
+Yatube – социальная сеть для публикации дневников. Можно публиковать посты как в общую ленту, так и в определенную группу. Публикации можно комментировать, подписываться на авторов. К постам можно прикреплять картинку. Все действия с публикациями доступны авторизованным пользователям.
+
+## Техническое описание
+
+- Технология - Django
+- База данных - SQLite
+- Python 3
+
+## Установка
+
+Создать виртуальное окружение:
+```
+python3 -m venv venv
+```
+Активировать его:
+```
+source venv/bin/activate
+```
+Установить зависимости:
+```
+pip install -r requirements.txt
+```
+Применить миграции:
+```
+python manage.py migrate
+```
+Создать суперпользователя для входа в админку:
+```
+python manage.py createsuperuser
+```
+Запуск сервера:
+```
+python manage.py runserver
+```
+Доступ к админке по адресу:
+```
+http://127.0.0.1:8000/admin/
+```
